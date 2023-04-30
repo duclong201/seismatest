@@ -61,6 +61,6 @@ func lastDayOfCurrentMonth() string {
 	now := time.Now()
 	firstDayOfNextMonth := time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, time.UTC)
 	// Subtract one day from it to get the last day of the given month
-	lastDay := fmt.Sprintf("%d", firstDayOfNextMonth.AddDate(0, 0, -1))
+	lastDay := fmt.Sprintf("%d", firstDayOfNextMonth.AddDate(0, 0, -1).Day())
 	return lastDay
 }
