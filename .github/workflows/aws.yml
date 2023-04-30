@@ -21,7 +21,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }}
           aws-region: "ap-southeast-2"
 
-      - name: Upload package to S3 bucket
+      - name: Upload application package to S3 bucket
         run: aws s3 cp deploy_package.zip s3://seisma-test-first-bucket/
 
       - name: Create new ElasticBeanstalk Application Version
