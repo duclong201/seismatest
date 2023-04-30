@@ -25,20 +25,25 @@ func main() {
 
 // Handle REST request to calculate tax
 func HandleRequest(w http.ResponseWriter, r *http.Request) {
-	var employees []utils.Employee
-	err := json.NewDecoder(r.Body).Decode(&employees)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+	if r.Method == "POST" {
+		var employees []utils.Employee
+		err := json.NewDecoder(r.Body).Decode(&employees)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		fmt.Println(employees)
+		var payslips []PayslipResponse
+		for _, employee := range employees {
+			payslip := GenerateJSONResponse(employee)
+			payslips = append(payslips, payslip)
+		}
+		w.Header().Set("ContentType", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(payslips)
+	} else {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
-	var payslips []PayslipResponse
-	for _, employee := range employees {
-		payslip := GenerateJSONResponse(employee)
-		payslips = append(payslips, payslip)
-	}
-	w.Header().Set("ContentType", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(payslips)
 }
 
 // Generate payslip for given employee
