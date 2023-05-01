@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"main/utils"
 	"net/http"
@@ -78,21 +77,21 @@ func main() {
 
 	r := gin.Default()
 	gin.SetMode(gin.ReleaseMode)
-
 	r.GET("/test", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "Tested!",
 		})
 	})
-
-	r.POST("/calculateTax", HandleGinRequest)
-
+	r.POST("/calculateTax", HandleRequest)
 	r.Run(":5000")
 
 	fmt.Println("Handle Request with gin")
 }
 
-func HandleGinRequest(c *gin.Context) {
+// Handle request to calculate tax
+func HandleRequest(c *gin.Context) {
+
+	fmt.Println("Gin context:")
 	fmt.Println(c)
 	var employees []utils.Employee
 	if err := c.ShouldBindJSON(&employees); err != nil {
@@ -108,32 +107,6 @@ func HandleGinRequest(c *gin.Context) {
 	payload := gin.H{"message": "Calculated tax successfully", "payslips": payslips}
 
 	c.JSON(http.StatusOK, payload)
-}
-
-// Handle REST request to calculate tax
-func HandleRequest(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Handling Request")
-	if r.Method == "POST" {
-		var employees []utils.Employee
-		fmt.Println(r.Body)
-		err := json.NewDecoder(r.Body).Decode(&employees)
-		if err != nil {
-			fmt.Println("Failed to decode r.Body")
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		fmt.Println(employees)
-		var payslips []utils.PayslipResponse
-		for _, employee := range employees {
-			payslip := GenerateJSONResponse(employee)
-			payslips = append(payslips, payslip)
-		}
-		w.Header().Set("ContentType", "application/json")
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(payslips)
-	} else {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-	}
 }
 
 // Generate payslip for given employee
