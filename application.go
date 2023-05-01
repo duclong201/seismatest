@@ -77,6 +77,7 @@ func main() {
 	fmt.Println("Start Application")
 
 	r := gin.Default()
+	gin.SetMode(gin.ReleaseMode)
 
 	r.GET("/test", func(c *gin.Context) {
 		c.JSON(200, gin.H{
