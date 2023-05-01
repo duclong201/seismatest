@@ -28,7 +28,7 @@ func main() {
 	r := gin.Default()
 	r.POST("/calculateTax", HandleGinRequest)
 	r.Run(":8080")
-	fmt.Println()
+	fmt.Println("Handle Request with gin")
 }
 
 func HandleGinRequest(c *gin.Context) {

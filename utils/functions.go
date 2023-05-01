@@ -54,7 +54,11 @@ func ParseTaxRates(line []string) (TaxRate, error) {
 	}
 	maxValue, err := strconv.ParseFloat(line[1], 64)
 	if err != nil {
-		return defaultTaxRate, err
+		if line[1] == "math.MaxFloat64" {
+			maxValue = math.MaxFloat64
+		} else {
+			return defaultTaxRate, err
+		}
 	}
 	fixValue, err := strconv.ParseFloat(line[2], 64)
 	if err != nil {
