@@ -27,8 +27,10 @@ func main() {
 func HandleRequest(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		var employees []utils.Employee
+		fmt.Println(r.Body)
 		err := json.NewDecoder(r.Body).Decode(&employees)
 		if err != nil {
+			fmt.Println("Failed to decode r.Body")
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
