@@ -97,7 +97,9 @@ func HandleRequest(c *gin.Context) {
 	}
 	var payslips []utils.PayslipResponse
 	for _, employee := range employees {
-		payslip := GenerateJSONResponse(employee)
+		fmt.Println(employee)
+		payslip := GeneratePayslip(employee)
+		fmt.Println(payslip)
 		payslips = append(payslips, payslip)
 	}
 
@@ -107,7 +109,7 @@ func HandleRequest(c *gin.Context) {
 }
 
 // Generate payslip for given employee
-func GenerateJSONResponse(employee utils.Employee) utils.PayslipResponse {
+func GeneratePayslip(employee utils.Employee) utils.PayslipResponse {
 	var payslip utils.PayslipResponse
 	payslip.Employee = employee
 	payslip.AnnualSalary = employee.AnnualSalary
