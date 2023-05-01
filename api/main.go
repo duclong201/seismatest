@@ -10,16 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type PayslipResponse struct {
-	utils.Employee
-	FromDate       string
-	ToDate         string
-	GrossIncome    int
-	IncomeTax      int
-	Superannuation int
-	NetIncome      int
-}
-
 func main() {
 	// fmt.Println("API started")
 	// http.HandleFunc("/calculateTax", HandleRequest)
@@ -37,7 +27,7 @@ func HandleGinRequest(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	var payslips []PayslipResponse
+	var payslips []utils.PayslipResponse
 	for _, employee := range employees {
 		payslip := GenerateJSONResponse(employee)
 		payslips = append(payslips, payslip)
@@ -61,7 +51,7 @@ func HandleRequest(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		fmt.Println(employees)
-		var payslips []PayslipResponse
+		var payslips []utils.PayslipResponse
 		for _, employee := range employees {
 			payslip := GenerateJSONResponse(employee)
 			payslips = append(payslips, payslip)
@@ -75,8 +65,8 @@ func HandleRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 // Generate payslip for given employee
-func GenerateJSONResponse(employee utils.Employee) PayslipResponse {
-	var payslip PayslipResponse
+func GenerateJSONResponse(employee utils.Employee) utils.PayslipResponse {
+	var payslip utils.PayslipResponse
 	payslip.Employee = employee
 	payslip.AnnualSalary = employee.AnnualSalary
 	incomeTax := utils.CalculateTax(employee.AnnualSalary)

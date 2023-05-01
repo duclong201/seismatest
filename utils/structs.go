@@ -35,3 +35,13 @@ type TaxRate struct {
 type Calculator struct {
 	TaxRates []TaxRate
 }
+
+type PayslipResponse struct {
+	Employee
+	FromDate       string
+	ToDate         string
+	GrossIncome    int
+	IncomeTax      int
+	Superannuation int
+	NetIncome      int
+}
