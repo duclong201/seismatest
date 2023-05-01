@@ -88,5 +88,5 @@ func CalculateTax(annualSalary float64) float64 {
 
 // CalculateSuper calculates the superannuation for the given super rate and gross income
 func CalculateSuper(superRate float64, grossIncome float64) float64 {
-	return math.Round(superRate * grossIncome / 100)
+	return math.Round(superRate * grossIncome)
 }

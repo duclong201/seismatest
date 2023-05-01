@@ -95,12 +95,9 @@ func HandleRequest(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	fmt.Println(employees)
 	var payslips []utils.PayslipResponse
 	for _, employee := range employees {
-		fmt.Println(employee)
 		payslip := GeneratePayslip(employee)
-		fmt.Println(payslip)
 		payslips = append(payslips, payslip)
 	}
 
@@ -120,7 +117,7 @@ func GeneratePayslip(employee utils.Employee) utils.PayslipResponse {
 	payslip.Superannuation = int(utils.CalculateSuper(employee.SuperRate, employee.AnnualSalary))
 	currentMonth := time.Now().Month().String()
 	payslip.FromDate = "01 " + currentMonth
-	payslip.ToDate = lastDayOfCurrentMonth() + currentMonth
+	payslip.ToDate = lastDayOfCurrentMonth() + " " + currentMonth
 	return payslip
 }
 
