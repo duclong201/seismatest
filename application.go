@@ -82,6 +82,8 @@ func main() {
 	r.POST("/calculateTax", HandleGinRequest)
 	r.Run(":8080")
 	fmt.Println("Handle Request with gin")
+	http.HandleFunc("/calculateTax", HandleRequest)
+	http.ListenAndServe(":8080", nil)
 }
 
 func HandleGinRequest(c *gin.Context) {
