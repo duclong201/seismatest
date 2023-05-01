@@ -77,6 +77,7 @@ func main() {
 	// fmt.Println("API started")
 	// http.HandleFunc("/calculateTax", HandleRequest)
 	// http.ListenAndServe(":8080", nil)
+	fmt.Println("Start Application")
 
 	r := gin.Default()
 
