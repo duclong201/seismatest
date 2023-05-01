@@ -19,12 +19,14 @@ type PayslipResponse struct {
 }
 
 func main() {
+	fmt.Println("API started")
 	http.HandleFunc("/calculateTax", HandleRequest)
 	http.ListenAndServe(":8080", nil)
 }
 
 // Handle REST request to calculate tax
 func HandleRequest(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Handling Request")
 	if r.Method == "POST" {
 		var employees []utils.Employee
 		fmt.Println(r.Body)
