@@ -68,7 +68,7 @@ func HandleRequest(w http.ResponseWriter, r *http.Request) {
 func GenerateJSONResponse(employee utils.Employee) utils.PayslipResponse {
 	var payslip utils.PayslipResponse
 	payslip.Employee = employee
-	payslip.AnnualSalary = employee.AnnualSalary
+	payslip.GrossIncome = int(employee.AnnualSalary)
 	incomeTax := utils.CalculateTax(employee.AnnualSalary)
 	payslip.IncomeTax = int(incomeTax)
 	payslip.NetIncome = int(employee.AnnualSalary - incomeTax)

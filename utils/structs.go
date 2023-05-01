@@ -37,7 +37,7 @@ type Calculator struct {
 }
 
 type PayslipResponse struct {
-	Employee
+	Employee       Employee
 	FromDate       string
 	ToDate         string
 	GrossIncome    int
