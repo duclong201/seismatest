@@ -91,7 +91,7 @@ func main() {
 // Handle request to calculate tax
 func HandleRequest(c *gin.Context) {
 	var employees []utils.Employee
-	if err := c.ShouldBind(&employees); err != nil {
+	if err := c.ShouldBindJSON(&employees); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
