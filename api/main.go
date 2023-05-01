@@ -6,6 +6,8 @@ import (
 	"main/utils"
 	"net/http"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 type PayslipResponse struct {
@@ -19,9 +21,31 @@ type PayslipResponse struct {
 }
 
 func main() {
-	fmt.Println("API started")
-	http.HandleFunc("/calculateTax", HandleRequest)
-	http.ListenAndServe(":8080", nil)
+	// fmt.Println("API started")
+	// http.HandleFunc("/calculateTax", HandleRequest)
+	// http.ListenAndServe(":8080", nil)
+
+	r := gin.Default()
+	r.POST("/calculateTax", HandleGinRequest)
+	r.Run(":8080")
+	fmt.Println()
+}
+
+func HandleGinRequest(c *gin.Context) {
+	var employees []utils.Employee
+	if err := c.ShouldBindJSON(&employees); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	var payslips []PayslipResponse
+	for _, employee := range employees {
+		payslip := GenerateJSONResponse(employee)
+		payslips = append(payslips, payslip)
+	}
+
+	payload := gin.H{"message": "Calculated tax successfully", "payslips": payslips}
+
+	c.JSON(http.StatusOK, payload)
 }
 
 // Handle REST request to calculate tax
