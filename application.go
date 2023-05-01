@@ -79,8 +79,17 @@ func main() {
 	// http.ListenAndServe(":8080", nil)
 
 	r := gin.Default()
+
+	r.GET("/test", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "Tested!",
+		})
+	})
+
 	r.POST("/calculateTax", HandleGinRequest)
+
 	r.Run(":8080")
+
 	fmt.Println("Handle Request with gin")
 	http.HandleFunc("/calculateTax", HandleRequest)
 	http.ListenAndServe(":8080", nil)
