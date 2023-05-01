@@ -95,6 +95,7 @@ func HandleRequest(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	fmt.Println(employees)
 	var payslips []utils.PayslipResponse
 	for _, employee := range employees {
 		fmt.Println(employee)
