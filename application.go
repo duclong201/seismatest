@@ -74,9 +74,6 @@ import (
 // }
 
 func main() {
-	// fmt.Println("API started")
-	// http.HandleFunc("/calculateTax", HandleRequest)
-	// http.ListenAndServe(":8080", nil)
 	fmt.Println("Start Application")
 
 	r := gin.Default()
@@ -92,8 +89,6 @@ func main() {
 	r.Run(":8080")
 
 	fmt.Println("Handle Request with gin")
-	http.HandleFunc("/calculateTax", HandleRequest)
-	http.ListenAndServe(":8080", nil)
 }
 
 func HandleGinRequest(c *gin.Context) {
