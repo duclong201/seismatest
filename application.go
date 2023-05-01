@@ -87,6 +87,7 @@ func main() {
 }
 
 func HandleGinRequest(c *gin.Context) {
+	fmt.Println(c)
 	var employees []utils.Employee
 	if err := c.ShouldBindJSON(&employees); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
