@@ -115,25 +115,22 @@ func HandleJSONUpload(c *gin.Context) {
 		return
 	}
 
+	var payslips []utils.PayslipResponse
+
 	for _, obj := range jsonData {
 		fmt.Println(obj)
+		employee := utils.Employee{FirstName: obj["firstName"].(string),
+			LastName:     obj["lastName"].(string),
+			AnnualSalary: obj["annualSalary"].(float64),
+			PaymentMonth: obj["paymentMonth"].(int),
+			SuperRate:    obj["superRate"].(float64)}
+		payslip := GenerateRESTPayslip(employee)
+		payslips = append(payslips, payslip)
 	}
 
-	// var employees []utils.Employee
-	// if err := .ShouldBindJSON(&employees); err != nil {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	payload := gin.H{"message": "Calculated tax successfully", "payslips": payslips}
 
-	// var payslips []utils.PayslipResponse
-	// for _, employee := range employees {
-	// 	payslip := GenerateRESTPayslip(employee)
-	// 	payslips = append(payslips, payslip)
-	// }
-
-	// payload := gin.H{"message": "Calculated tax successfully", "payslips": payslips}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Calculated tax successfully"})
+	c.JSON(http.StatusOK, payload)
 }
 
 // Generate payslip for given employee
