@@ -21,7 +21,7 @@ func main() {
 	})
 	r.POST("/calculateTax", HandleRequest)
 	r.POST("/uploadCSV", HandleCSVUpload)
-	r.POST("/uploadJSON", HandleRequest)
+	r.POST("/uploadJSON", HandleJSONUpload)
 	r.Run(":5000")
 }
 
@@ -70,6 +70,24 @@ func HandleCSVUpload(c *gin.Context) {
 func HandleRequest(c *gin.Context) {
 	var employees []utils.Employee
 	if err := c.ShouldBindJSON(&employees); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	var payslips []utils.PayslipResponse
+	for _, employee := range employees {
+		payslip := GenerateRESTPayslip(employee)
+		payslips = append(payslips, payslip)
+	}
+
+	payload := gin.H{"message": "Calculated tax successfully", "payslips": payslips}
+
+	c.JSON(http.StatusOK, payload)
+}
+
+// Handle request to calculate tax
+func HandleJSONUpload(c *gin.Context) {
+	var employees []utils.Employee
+	if err := c.ShouldBind(&employees); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
