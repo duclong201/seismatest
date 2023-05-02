@@ -23,9 +23,6 @@ func main() {
 	r.POST("/uploadCSV", HandleCSVUpload)
 	// r.POST("/uploadJSON", HandleJSONUpload)
 	r.Run(":5000")
-
-	http.HandleFunc("/uploadCSV", HandleCSV)
-	http.ListenAndServe(":5000", nil)
 }
 
 func HandleCSVUpload(c *gin.Context) {
