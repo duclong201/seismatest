@@ -1,4 +1,4 @@
 ﻿FirstName,LastName,AnnualSalary,SuperRate,PaymentPeriod
-Monica,Tan,60050,9%,01 March – 31 March
-Brend,Tulu,120000,10%,01 March – 31 March
-Long,Nguyen,100000,10%,01 March - 31 March
+Monica,Tan,60050,0.09,01 March – 31 March
+Brend,Tulu,120000,0.1,01 March – 31 March
+Long,Nguyen,100000,0.1,01 March - 31 March

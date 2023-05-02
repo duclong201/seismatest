@@ -7,7 +7,6 @@ import (
 	"main/utils"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -170,12 +169,12 @@ func ParseEmployeeCSV(line []string) (utils.CSVEmployee, error) {
 		return utils.CSVEmployee{}, err
 	}
 
-	superRate, err := strconv.ParseFloat(strings.TrimRight(line[3], "%"), 64)
+	superRate, err := strconv.ParseFloat(line[3], 64)
 	if err != nil {
 		return utils.CSVEmployee{}, err
 	}
 
-	return utils.CSVEmployee{FirstName: line[0], LastName: line[1], AnnualSalary: annualSalary, PaymentStart: line[4], SuperRate: superRate / 100}, nil
+	return utils.CSVEmployee{FirstName: line[0], LastName: line[1], AnnualSalary: annualSalary, PaymentStart: line[4], SuperRate: superRate}, nil
 }
 
 // Generate Payslip for given employee
