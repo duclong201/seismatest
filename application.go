@@ -147,7 +147,7 @@ func HandleJSONUpload(c *gin.Context) {
 		employee := Employee{FirstName: obj["firstName"].(string),
 			LastName:     obj["lastName"].(string),
 			AnnualSalary: obj["annualSalary"].(float64),
-			PaymentMonth: obj["paymentMonth"].(int),
+			PaymentMonth: int(obj["paymentMonth"].(int)),
 			SuperRate:    obj["superRate"].(float64)}
 		payslip := GenerateRESTPayslip(employee)
 		payslips = append(payslips, payslip)
