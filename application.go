@@ -37,7 +37,7 @@ func HandleCSVUpload(c *gin.Context) {
 	}
 
 	contentType := file.Header.Get("Content-Type")
-	fmt.Println("Content type %s", contentType)
+	fmt.Println("Content type " + contentType)
 
 	csvFile, err := file.Open()
 	if err != nil {
@@ -95,7 +95,7 @@ func HandleJSONUpload(c *gin.Context) {
 	}
 
 	contentType := file.Header.Get("Content-Type")
-	fmt.Println("Content type %s", contentType)
+	fmt.Println("Content type " + contentType)
 
 	jsonFile, err := file.Open()
 	if err != nil {
