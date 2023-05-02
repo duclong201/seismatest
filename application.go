@@ -44,6 +44,8 @@ func HandleCSVUpload(c *gin.Context) {
 		fmt.Println("Content type CSV")
 	} else if ext == ".txt" {
 		fmt.Println("Content type TXT")
+	} else {
+		fmt.Println("Content type: " + ext)
 	}
 
 	csvFile, err := file.Open()
@@ -108,6 +110,8 @@ func HandleJSONUpload(c *gin.Context) {
 		fmt.Println("Content type CSV")
 	} else if ext == ".txt" {
 		fmt.Println("Content type TXT")
+	} else {
+		fmt.Println("Content type: " + ext)
 	}
 
 	jsonFile, err := file.Open()
