@@ -35,6 +35,10 @@ func HandleCSVUpload(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	contentType := file.Header.Get("Content-Type")
+	fmt.Println(contentType)
+
 	csvFile, err := file.Open()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -89,6 +93,9 @@ func HandleJSONUpload(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	contentType := file.Header.Get("Content-Type")
+	fmt.Println(contentType)
 
 	jsonFile, err := file.Open()
 	if err != nil {
