@@ -89,6 +89,8 @@ func HandleJSONUpload(c *gin.Context) {
 		return
 	}
 
+	fmt.Println("Get file successfully")
+
 	jsonFile, err := file.Open()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -98,6 +100,8 @@ func HandleJSONUpload(c *gin.Context) {
 	}
 	defer jsonFile.Close()
 
+	fmt.Println("Open file successfully")
+
 	data, err := ioutil.ReadAll(jsonFile)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -105,6 +109,8 @@ func HandleJSONUpload(c *gin.Context) {
 		})
 		return
 	}
+
+	fmt.Println("Read data successfully")
 
 	var jsonData []map[string]interface{}
 	err = json.Unmarshal(data, &jsonData)
@@ -114,6 +120,9 @@ func HandleJSONUpload(c *gin.Context) {
 		})
 		return
 	}
+
+	fmt.Println("Read jsonData successfully")
+	fmt.Println(jsonData)
 
 	var payslips []utils.PayslipResponse
 
@@ -127,6 +136,8 @@ func HandleJSONUpload(c *gin.Context) {
 		payslip := GenerateRESTPayslip(employee)
 		payslips = append(payslips, payslip)
 	}
+
+	fmt.Println(payslips)
 
 	payload := gin.H{"message": "Calculated tax successfully", "payslips": payslips}
 
