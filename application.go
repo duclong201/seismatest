@@ -82,12 +82,10 @@ func HandleRequest(c *gin.Context) {
 // Handle JSON Upload from POST request and return processed payslips
 func HandleJSONUpload(c *gin.Context) {
 	var employees []utils.Employee
-	if err := c.ShouldBind(&employees); err != nil {
+	if err := c.ShouldBindJSON(&employees); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	fmt.Println(employees)
 
 	var payslips []utils.PayslipResponse
 	for _, employee := range employees {
