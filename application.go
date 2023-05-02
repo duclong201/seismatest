@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"main/utils"
 	"math"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"path"
@@ -26,40 +27,54 @@ func main() {
 		})
 	})
 	r.POST("/calculateTax", HandleRequest)
-	r.POST("/uploadCSV", HandleCSVUpload)
-	r.POST("/uploadJSON", HandleJSONUpload)
+	r.POST("/upload", HandleUpload)
 	r.Run(":5000")
 }
 
-// HandleCSVUpload method handles the csv file uploaded with POST request and return processed payslips
-func HandleCSVUpload(c *gin.Context) {
-	file, err := c.FormFile("file")
+func HandleUpload(c *gin.Context) {
+	formFile, err := c.FormFile("file")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	ext := path.Ext(file.Filename)
+	file, err := formFile.Open()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	defer file.Close()
 
-	// Check the file extension
+	ext := path.Ext(formFile.Filename)
+
 	if ext == ".csv" {
-		fmt.Println("Content type CSV")
+		payslips, err := HandleCSVFile(file)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		payload := gin.H{"message": "Calculated tax successfully", "payslips": payslips}
+		c.JSON(http.StatusOK, payload)
 	} else if ext == ".txt" {
-		fmt.Println("Content type TXT")
+		payslips, err := HandleJSONFile(file)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		payload := gin.H{"message": "Calculated tax successfully", "payslips": payslips}
+		c.JSON(http.StatusOK, payload)
 	} else {
-		fmt.Println("Content type: " + ext)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file"})
+		return
 	}
 
-	csvFile, err := file.Open()
+}
+
+// Handle CSV file, calculate tax and return payslips for given CSV file
+func HandleCSVFile(file multipart.File) ([]utils.PaySlip, error) {
+	csvLines, err := csv.NewReader(file).ReadAll()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	defer csvFile.Close()
-	csvLines, err := csv.NewReader(csvFile).ReadAll()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		return nil, err
 	}
 	var payslips []utils.PaySlip
 
@@ -69,14 +84,40 @@ func HandleCSVUpload(c *gin.Context) {
 		}
 		employee, err := ParseEmployeeCSV(line)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
+			return nil, err
 		}
 		payslip := GenerateCSVPayslip(employee)
 		payslips = append(payslips, payslip)
 	}
-	payload := gin.H{"message": "Calculated tax successfully", "payslips": payslips}
-	c.JSON(http.StatusOK, payload)
+	return payslips, nil
+}
+
+// Handle Json file, calculate tax and return payslips for given JSON file
+func HandleJSONFile(file multipart.File) ([]utils.PayslipResponse, error) {
+	data, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+
+	var jsonData []map[string]interface{}
+	err = json.Unmarshal(data, &jsonData)
+	if err != nil {
+		return nil, err
+	}
+
+	var payslips []utils.PayslipResponse
+
+	for _, obj := range jsonData {
+		employee := utils.Employee{FirstName: obj["firstName"].(string),
+			LastName:     obj["lastName"].(string),
+			AnnualSalary: obj["annualSalary"].(float64),
+			PaymentMonth: int(obj["paymentMonth"].(float64)),
+			SuperRate:    obj["superRate"].(float64)}
+		payslip := GenerateRESTPayslip(employee)
+		payslips = append(payslips, payslip)
+	}
+
+	return payslips, nil
 }
 
 // Handle request to calculate tax
@@ -88,68 +129,6 @@ func HandleRequest(c *gin.Context) {
 	}
 	var payslips []utils.PayslipResponse
 	for _, employee := range employees {
-		payslip := GenerateRESTPayslip(employee)
-		payslips = append(payslips, payslip)
-	}
-
-	payload := gin.H{"message": "Calculated tax successfully", "payslips": payslips}
-
-	c.JSON(http.StatusOK, payload)
-}
-
-// Handle JSON Upload from POST request and return processed payslips
-func HandleJSONUpload(c *gin.Context) {
-	file, err := c.FormFile("file")
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	ext := path.Ext(file.Filename)
-
-	// Check the file extension
-	if ext == ".csv" {
-		fmt.Println("Content type CSV")
-	} else if ext == ".txt" {
-		fmt.Println("Content type TXT")
-	} else {
-		fmt.Println("Content type: " + ext)
-	}
-
-	jsonFile, err := file.Open()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "unable to open file",
-		})
-		return
-	}
-	defer jsonFile.Close()
-
-	data, err := ioutil.ReadAll(jsonFile)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "invalid JSON data",
-		})
-		return
-	}
-
-	var jsonData []map[string]interface{}
-	err = json.Unmarshal(data, &jsonData)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "invalid JSON data",
-		})
-		return
-	}
-
-	var payslips []utils.PayslipResponse
-
-	for _, obj := range jsonData {
-		employee := utils.Employee{FirstName: obj["firstName"].(string),
-			LastName:     obj["lastName"].(string),
-			AnnualSalary: obj["annualSalary"].(float64),
-			PaymentMonth: int(obj["paymentMonth"].(float64)),
-			SuperRate:    obj["superRate"].(float64)}
 		payslip := GenerateRESTPayslip(employee)
 		payslips = append(payslips, payslip)
 	}
