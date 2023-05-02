@@ -17,7 +17,7 @@ func GetTaxRates() []TaxRate {
 		{180000, math.MaxFloat64, 54232, 0.45}}
 
 	// Read tax rates in CSV file
-	csvFile, err := os.Open("taxRates.csv")
+	csvFile, err := os.Open("../csv/taxRates.csv")
 	if err != nil {
 		fmt.Println("Failed to read csv file. Using default calculator", err)
 		return defaultTaxRates

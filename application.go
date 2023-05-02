@@ -1,80 +1,19 @@
 package main
 
 import (
+	"encoding/csv"
+	"encoding/json"
 	"fmt"
 	"main/utils"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
-// func main() {
-// 	csvFile, err := os.Open("employee.csv")
-// 	if err != nil {
-// 		fmt.Println("Failed to read csv file.", err)
-// 		return
-// 	}
-// 	fmt.Println("Successfully Opened CSV file")
-// 	defer csvFile.Close()
-
-// 	csvLines, err := csv.NewReader(csvFile).ReadAll()
-// 	if err != nil {
-// 		fmt.Println(err)
-// 	}
-
-// 	for i, line := range csvLines {
-// 		if i == 0 {
-// 			continue
-// 		}
-// 		newEmployee, err := ParseEmployeeJSON(line)
-// 		payslip := GeneratePayslipCSV(newEmployee)
-// 		fmt.Println(payslip)
-// 		if err != nil {
-// 			fmt.Println(err)
-// 			return
-// 		}
-// 	}
-// }
-
-// // ParseEmployee parses a string array of employee details and returns an Employee object
-// func ParseEmployeeJSON(record []string) (utils.CSVEmployee, error) {
-// 	annualSalary, err := strconv.ParseFloat(record[2], 64)
-// 	if err != nil {
-// 		return utils.CSVEmployee{}, err
-// 	}
-// 	superRate, err := strconv.ParseFloat(strings.TrimRight(record[3], "%"), 64)
-// 	if err != nil {
-// 		return utils.CSVEmployee{}, err
-// 	}
-
-// 	if err != nil {
-// 		return utils.CSVEmployee{}, err
-// 	}
-// 	return utils.CSVEmployee{
-// 		FirstName:    record[0],
-// 		LastName:     record[1],
-// 		AnnualSalary: annualSalary,
-// 		SuperRate:    superRate,
-// 		PaymentStart: record[4],
-// 	}, nil
-// }
-
-// // GeneratePayslip method returns the payslip for given employee
-// func GeneratePayslipCSV(employee utils.CSVEmployee) utils.PaySlip {
-// 	var ps utils.PaySlip
-// 	ps.Name = employee.FirstName + " " + employee.LastName
-// 	ps.AnnualSalary = employee.AnnualSalary
-// 	ps.IncomeTax = utils.CalculateTax(employee.AnnualSalary)
-// 	ps.NetIncome = employee.AnnualSalary - ps.IncomeTax
-// 	ps.PayPeriod = employee.PaymentStart
-// 	ps.Superannuation = utils.CalculateSuper(employee.SuperRate, ps.AnnualSalary)
-// 	return ps
-// }
-
 func main() {
-	fmt.Println("Start Application")
-
 	r := gin.Default()
 	gin.SetMode(gin.ReleaseMode)
 	r.GET("/test", func(c *gin.Context) {
@@ -85,7 +24,47 @@ func main() {
 	r.POST("/calculateTax", HandleRequest)
 	r.Run(":5000")
 
-	fmt.Println("Handle Request with gin")
+	http.HandleFunc("/uploadCSV", HandleCSV)
+	http.ListenAndServe(":5000", nil)
+}
+
+// Handle CSV file uploaded from POST request
+func HandleCSV(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseMultipartForm(32 << 20)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	file, _, err := r.FormFile("csv_file")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	// Process the CSV data
+	csvData, err := csv.NewReader(file).ReadAll()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Return a response to confirm that the CSV file has been successfully processed
+	response := make(map[string]interface{})
+	response["message"] = "CSV file successfully processed"
+	response["data"] = csvData
+
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonResponse)
+
 }
 
 // Handle request to calculate tax
@@ -97,7 +76,7 @@ func HandleRequest(c *gin.Context) {
 	}
 	var payslips []utils.PayslipResponse
 	for _, employee := range employees {
-		payslip := GeneratePayslip(employee)
+		payslip := GenerateRESTPayslip(employee)
 		payslips = append(payslips, payslip)
 	}
 
@@ -107,7 +86,7 @@ func HandleRequest(c *gin.Context) {
 }
 
 // Generate payslip for given employee
-func GeneratePayslip(employee utils.Employee) utils.PayslipResponse {
+func GenerateRESTPayslip(employee utils.Employee) utils.PayslipResponse {
 	var payslip utils.PayslipResponse
 	payslip.Employee = employee
 	payslip.GrossIncome = int(employee.AnnualSalary)
@@ -128,4 +107,31 @@ func lastDayOfCurrentMonth() string {
 	// Subtract one day from it to get the last day of the given month
 	lastDay := fmt.Sprintf("%d", firstDayOfNextMonth.AddDate(0, 0, -1).Day())
 	return lastDay
+}
+
+// Parse employee for given line from the csv file
+func ParseEmployeeCSV(line []string) (utils.CSVEmployee, error) {
+	annualSalary, err := strconv.ParseFloat(line[2], 64)
+	if err != nil {
+		return utils.CSVEmployee{}, err
+	}
+
+	superRate, err := strconv.ParseFloat(strings.TrimRight(line[3], "%"), 64)
+	if err != nil {
+		return utils.CSVEmployee{}, err
+	}
+
+	return utils.CSVEmployee{FirstName: line[0], LastName: line[1], AnnualSalary: annualSalary, PaymentStart: line[4], SuperRate: superRate / 100}, nil
+}
+
+// Generate Payslip for given employee
+func GenerateCSVPayslip(employee utils.CSVEmployee) utils.PaySlip {
+	var payslip utils.PaySlip
+	payslip.Name = employee.FirstName + " " + employee.LastName
+	payslip.AnnualSalary = employee.AnnualSalary
+	payslip.IncomeTax = utils.CalculateTax(employee.AnnualSalary)
+	payslip.NetIncome = employee.AnnualSalary - payslip.IncomeTax
+	payslip.PayPeriod = employee.PaymentStart
+	payslip.Superannuation = utils.CalculateSuper(employee.SuperRate, employee.AnnualSalary)
+	return payslip
 }
