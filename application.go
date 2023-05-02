@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"main/utils"
 	"math"
 	"net/http"
 	"os"
@@ -60,7 +61,7 @@ func HandleCSVUpload(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	var payslips []PaySlip
+	var payslips []utils.PaySlip
 
 	for i, line := range csvLines {
 		if i == 0 {
@@ -80,12 +81,12 @@ func HandleCSVUpload(c *gin.Context) {
 
 // Handle request to calculate tax
 func HandleRequest(c *gin.Context) {
-	var employees []Employee
+	var employees []utils.Employee
 	if err := c.ShouldBindJSON(&employees); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	var payslips []PayslipResponse
+	var payslips []utils.PayslipResponse
 	for _, employee := range employees {
 		payslip := GenerateRESTPayslip(employee)
 		payslips = append(payslips, payslip)
@@ -141,10 +142,10 @@ func HandleJSONUpload(c *gin.Context) {
 		return
 	}
 
-	var payslips []PayslipResponse
+	var payslips []utils.PayslipResponse
 
 	for _, obj := range jsonData {
-		employee := Employee{FirstName: obj["firstName"].(string),
+		employee := utils.Employee{FirstName: obj["firstName"].(string),
 			LastName:     obj["lastName"].(string),
 			AnnualSalary: obj["annualSalary"].(float64),
 			PaymentMonth: int(obj["paymentMonth"].(int)),
@@ -159,14 +160,14 @@ func HandleJSONUpload(c *gin.Context) {
 }
 
 // Generate payslip for given employee
-func GenerateRESTPayslip(employee Employee) PayslipResponse {
-	var payslip PayslipResponse
+func GenerateRESTPayslip(employee utils.Employee) utils.PayslipResponse {
+	var payslip utils.PayslipResponse
 	payslip.Employee = employee
 	payslip.GrossIncome = int(employee.AnnualSalary)
-	incomeTax := CalculateTax(employee.AnnualSalary)
+	incomeTax := utils.CalculateTax(employee.AnnualSalary)
 	payslip.IncomeTax = int(incomeTax)
 	payslip.NetIncome = int(employee.AnnualSalary - incomeTax)
-	payslip.Superannuation = int(CalculateSuper(employee.SuperRate, employee.AnnualSalary))
+	payslip.Superannuation = int(utils.CalculateSuper(employee.SuperRate, employee.AnnualSalary))
 	currentMonth := time.Now().Month().String()
 	payslip.FromDate = "01 " + currentMonth
 	payslip.ToDate = lastDayOfCurrentMonth() + " " + currentMonth
@@ -183,29 +184,29 @@ func lastDayOfCurrentMonth() string {
 }
 
 // Parse employee for given line from the csv file
-func ParseEmployeeCSV(line []string) (CSVEmployee, error) {
+func ParseEmployeeCSV(line []string) (utils.CSVEmployee, error) {
 	annualSalary, err := strconv.ParseFloat(line[2], 64)
 	if err != nil {
-		return CSVEmployee{}, err
+		return utils.CSVEmployee{}, err
 	}
 
 	superRate, err := strconv.ParseFloat(line[3], 64)
 	if err != nil {
-		return CSVEmployee{}, err
+		return utils.CSVEmployee{}, err
 	}
 
-	return CSVEmployee{FirstName: line[0], LastName: line[1], AnnualSalary: annualSalary, PaymentStart: line[4], SuperRate: superRate}, nil
+	return utils.CSVEmployee{FirstName: line[0], LastName: line[1], AnnualSalary: annualSalary, PaymentStart: line[4], SuperRate: superRate}, nil
 }
 
 // Generate Payslip for given employee
-func GenerateCSVPayslip(employee CSVEmployee) PaySlip {
-	var payslip PaySlip
+func GenerateCSVPayslip(employee utils.CSVEmployee) utils.PaySlip {
+	var payslip utils.PaySlip
 	payslip.Name = employee.FirstName + " " + employee.LastName
 	payslip.AnnualSalary = employee.AnnualSalary
-	payslip.IncomeTax = CalculateTax(employee.AnnualSalary)
+	payslip.IncomeTax = utils.CalculateTax(employee.AnnualSalary)
 	payslip.NetIncome = employee.AnnualSalary - payslip.IncomeTax
 	payslip.PayPeriod = employee.PaymentStart
-	payslip.Superannuation = CalculateSuper(employee.SuperRate, employee.AnnualSalary)
+	payslip.Superannuation = utils.CalculateSuper(employee.SuperRate, employee.AnnualSalary)
 	return payslip
 }
 
