@@ -22,10 +22,55 @@ func main() {
 		})
 	})
 	r.POST("/calculateTax", HandleRequest)
+	r.POST("/uploadCSV", HandleCSVUpload)
+	// r.POST("/uploadJSON", HandleJSONUpload)
 	r.Run(":5000")
 
 	http.HandleFunc("/uploadCSV", HandleCSV)
 	http.ListenAndServe(":5000", nil)
+}
+
+func HandleCSVUpload(c *gin.Context) {
+	// Get the file from the request
+	file, err := c.FormFile("file")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Open the file
+	csvFile, err := file.Open()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer csvFile.Close()
+
+	csvLines, err := csv.NewReader(csvFile).ReadAll()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	var payslips []utils.PaySlip
+
+	for i, line := range csvLines {
+		if i == 0 {
+			continue
+		}
+		employee, err := ParseEmployeeCSV(line)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		payslip := GenerateCSVPayslip(employee)
+		payslips = append(payslips, payslip)
+	}
+
+	payload := gin.H{"message": "Calculated tax successfully", "payslips": payslips}
+
+	// Send the response
+	c.JSON(http.StatusOK, payload)
 }
 
 // Handle CSV file uploaded from POST request
