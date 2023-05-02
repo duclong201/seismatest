@@ -21,10 +21,11 @@ func main() {
 	})
 	r.POST("/calculateTax", HandleRequest)
 	r.POST("/uploadCSV", HandleCSVUpload)
-	// r.POST("/uploadJSON", HandleJSONUpload)
+	r.POST("/uploadJSON", HandleRequest)
 	r.Run(":5000")
 }
 
+// HandleCSVUpload method handles the csv file uploaded with POST request and return processed payslips
 func HandleCSVUpload(c *gin.Context) {
 	// Get the file from the request
 	file, err := c.FormFile("file")
@@ -32,9 +33,6 @@ func HandleCSVUpload(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	fmt.Println("Get file from request successfully")
-
 	// Open the file
 	csvFile, err := file.Open()
 	if err != nil {
@@ -42,17 +40,11 @@ func HandleCSVUpload(c *gin.Context) {
 		return
 	}
 	defer csvFile.Close()
-
-	fmt.Println("Open file successfully")
-
 	csvLines, err := csv.NewReader(csvFile).ReadAll()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	fmt.Println("Read CSV Successfully")
-
 	var payslips []utils.PaySlip
 
 	for i, line := range csvLines {
@@ -64,13 +56,9 @@ func HandleCSVUpload(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		fmt.Println(employee)
 		payslip := GenerateCSVPayslip(employee)
 		payslips = append(payslips, payslip)
 	}
-
-	fmt.Println("Generate Payslips successfully")
-
 	payload := gin.H{"message": "Calculated tax successfully", "payslips": payslips}
 
 	fmt.Println(payload)
