@@ -26,10 +26,10 @@ type PaySlip struct {
 }
 
 type TaxRate struct {
-	MaxValue float64
-	Rate     float64
 	Bracket  float64
+	MaxValue float64
 	FixValue float64
+	Rate     float64
 }
 
 type Calculator struct {
