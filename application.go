@@ -27,13 +27,11 @@ func main() {
 
 // HandleCSVUpload method handles the csv file uploaded with POST request and return processed payslips
 func HandleCSVUpload(c *gin.Context) {
-	// Get the file from the request
 	file, err := c.FormFile("file")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	// Open the file
 	csvFile, err := file.Open()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -60,9 +58,6 @@ func HandleCSVUpload(c *gin.Context) {
 		payslips = append(payslips, payslip)
 	}
 	payload := gin.H{"message": "Calculated tax successfully", "payslips": payslips}
-
-	fmt.Println(payload)
-	// Send the response
 	c.JSON(http.StatusOK, payload)
 }
 
@@ -84,13 +79,16 @@ func HandleRequest(c *gin.Context) {
 	c.JSON(http.StatusOK, payload)
 }
 
-// Handle request to calculate tax
+// Handle JSON Upload from POST request and return processed payslips
 func HandleJSONUpload(c *gin.Context) {
 	var employees []utils.Employee
 	if err := c.ShouldBind(&employees); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	fmt.Println(employees)
+
 	var payslips []utils.PayslipResponse
 	for _, employee := range employees {
 		payslip := GenerateRESTPayslip(employee)
