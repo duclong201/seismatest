@@ -37,7 +37,7 @@ func HandleCSVUpload(c *gin.Context) {
 	}
 
 	contentType := file.Header.Get("Content-Type")
-	fmt.Println(contentType)
+	fmt.Println("Content type %s", contentType)
 
 	csvFile, err := file.Open()
 	if err != nil {
@@ -95,7 +95,7 @@ func HandleJSONUpload(c *gin.Context) {
 	}
 
 	contentType := file.Header.Get("Content-Type")
-	fmt.Println(contentType)
+	fmt.Println("Content type %s", contentType)
 
 	jsonFile, err := file.Open()
 	if err != nil {
@@ -126,7 +126,6 @@ func HandleJSONUpload(c *gin.Context) {
 	var payslips []PayslipResponse
 
 	for _, obj := range jsonData {
-		fmt.Println(obj)
 		employee := Employee{FirstName: obj["firstName"].(string),
 			LastName:     obj["lastName"].(string),
 			AnnualSalary: obj["annualSalary"].(float64),
