@@ -211,9 +211,9 @@ func GenerateCSVPayslip(employee utils.CSVEmployee) utils.PaySlip {
 }
 
 // Load TaxRates from csv file
-func GetTaxRates() []TaxRate {
+func GetTaxRates() []utils.TaxRate {
 	// Provide default tax rates
-	defaultTaxRates := []TaxRate{{0, 18200, 0, 0},
+	defaultTaxRates := []utils.TaxRate{{0, 18200, 0, 0},
 		{18200, 37000, 0, 0.19},
 		{37000, 87000, 3572, 0.325},
 		{87000, 180000, 19822, 0.37},
@@ -232,7 +232,7 @@ func GetTaxRates() []TaxRate {
 		fmt.Println(err)
 	}
 
-	var taxRates []TaxRate
+	var taxRates []utils.TaxRate
 
 	for i, line := range csvLines {
 		if i == 0 {
@@ -249,8 +249,8 @@ func GetTaxRates() []TaxRate {
 }
 
 // Parse Tax rate from read csv line
-func ParseTaxRates(line []string) (TaxRate, error) {
-	defaultTaxRate := TaxRate{Bracket: 0, MaxValue: 0, FixValue: 0, Rate: 0}
+func ParseTaxRates(line []string) (utils.TaxRate, error) {
+	defaultTaxRate := utils.TaxRate{Bracket: 0, MaxValue: 0, FixValue: 0, Rate: 0}
 	bracket, err := strconv.ParseFloat(line[0], 64)
 	if err != nil {
 		return defaultTaxRate, err
@@ -271,7 +271,7 @@ func ParseTaxRates(line []string) (TaxRate, error) {
 	if err != nil {
 		return defaultTaxRate, err
 	}
-	return TaxRate{Bracket: bracket, MaxValue: maxValue, FixValue: fixValue, Rate: rate}, nil
+	return utils.TaxRate{Bracket: bracket, MaxValue: maxValue, FixValue: fixValue, Rate: rate}, nil
 }
 
 // CalculateTax method calculates the income tax for the given annual salary
