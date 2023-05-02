@@ -38,6 +38,8 @@ func HandleCSVUpload(c *gin.Context) {
 		return
 	}
 
+	fmt.Println("Get file from request successfully")
+
 	// Open the file
 	csvFile, err := file.Open()
 	if err != nil {
@@ -46,11 +48,15 @@ func HandleCSVUpload(c *gin.Context) {
 	}
 	defer csvFile.Close()
 
+	fmt.Println("Open file successfully")
+
 	csvLines, err := csv.NewReader(csvFile).ReadAll()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	fmt.Println("Read CSV Successfully")
 
 	var payslips []utils.PaySlip
 
@@ -66,6 +72,8 @@ func HandleCSVUpload(c *gin.Context) {
 		payslip := GenerateCSVPayslip(employee)
 		payslips = append(payslips, payslip)
 	}
+
+	fmt.Println("Generate Payslips successfully")
 
 	payload := gin.H{"message": "Calculated tax successfully", "payslips": payslips}
 
