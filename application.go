@@ -77,6 +77,7 @@ func HandleCSVUpload(c *gin.Context) {
 
 	payload := gin.H{"message": "Calculated tax successfully", "payslips": payslips}
 
+	fmt.Println(payload)
 	// Send the response
 	c.JSON(http.StatusOK, payload)
 }
