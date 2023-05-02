@@ -8,6 +8,7 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"path"
 	"strconv"
 	"time"
 
@@ -36,8 +37,14 @@ func HandleCSVUpload(c *gin.Context) {
 		return
 	}
 
-	contentType := file.Header.Get("Content-Type")
-	fmt.Println("Content type " + contentType)
+	ext := path.Ext(file.Filename)
+
+	// Check the file extension
+	if ext == ".csv" {
+		fmt.Println("Content type CSV")
+	} else if ext == ".txt" {
+		fmt.Println("Content type TXT")
+	}
 
 	csvFile, err := file.Open()
 	if err != nil {
@@ -94,8 +101,14 @@ func HandleJSONUpload(c *gin.Context) {
 		return
 	}
 
-	contentType := file.Header.Get("Content-Type")
-	fmt.Println("Content type " + contentType)
+	ext := path.Ext(file.Filename)
+
+	// Check the file extension
+	if ext == ".csv" {
+		fmt.Println("Content type CSV")
+	} else if ext == ".txt" {
+		fmt.Println("Content type TXT")
+	}
 
 	jsonFile, err := file.Open()
 	if err != nil {
