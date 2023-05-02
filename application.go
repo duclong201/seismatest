@@ -164,10 +164,10 @@ func GenerateRESTPayslip(employee utils.Employee) utils.PayslipResponse {
 	var payslip utils.PayslipResponse
 	payslip.Employee = employee
 	payslip.GrossIncome = int(employee.AnnualSalary)
-	incomeTax := utils.CalculateTax(employee.AnnualSalary)
+	incomeTax := CalculateTax(employee.AnnualSalary)
 	payslip.IncomeTax = int(incomeTax)
 	payslip.NetIncome = int(employee.AnnualSalary - incomeTax)
-	payslip.Superannuation = int(utils.CalculateSuper(employee.SuperRate, employee.AnnualSalary))
+	payslip.Superannuation = int(CalculateSuper(employee.SuperRate, employee.AnnualSalary))
 	currentMonth := time.Now().Month().String()
 	payslip.FromDate = "01 " + currentMonth
 	payslip.ToDate = lastDayOfCurrentMonth() + " " + currentMonth
@@ -203,10 +203,10 @@ func GenerateCSVPayslip(employee utils.CSVEmployee) utils.PaySlip {
 	var payslip utils.PaySlip
 	payslip.Name = employee.FirstName + " " + employee.LastName
 	payslip.AnnualSalary = employee.AnnualSalary
-	payslip.IncomeTax = utils.CalculateTax(employee.AnnualSalary)
+	payslip.IncomeTax = CalculateTax(employee.AnnualSalary)
 	payslip.NetIncome = employee.AnnualSalary - payslip.IncomeTax
 	payslip.PayPeriod = employee.PaymentStart
-	payslip.Superannuation = utils.CalculateSuper(employee.SuperRate, employee.AnnualSalary)
+	payslip.Superannuation = CalculateSuper(employee.SuperRate, employee.AnnualSalary)
 	return payslip
 }
 
