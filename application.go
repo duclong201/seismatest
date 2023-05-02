@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/csv"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"main/utils"
 	"net/http"
 	"strconv"
@@ -81,21 +83,57 @@ func HandleRequest(c *gin.Context) {
 
 // Handle JSON Upload from POST request and return processed payslips
 func HandleJSONUpload(c *gin.Context) {
-	var employees []utils.Employee
-	if err := c.ShouldBindJSON(&employees); err != nil {
+	file, err := c.FormFile("file")
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	var payslips []utils.PayslipResponse
-	for _, employee := range employees {
-		payslip := GenerateRESTPayslip(employee)
-		payslips = append(payslips, payslip)
+	jsonFile, err := file.Open()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "unable to open file",
+		})
+		return
+	}
+	defer jsonFile.Close()
+
+	data, err := ioutil.ReadAll(jsonFile)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "invalid JSON data",
+		})
+		return
 	}
 
-	payload := gin.H{"message": "Calculated tax successfully", "payslips": payslips}
+	var jsonData []map[string]interface{}
+	err = json.Unmarshal(data, &jsonData)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "invalid JSON data",
+		})
+		return
+	}
 
-	c.JSON(http.StatusOK, payload)
+	for _, obj := range jsonData {
+		fmt.Println(obj)
+	}
+
+	// var employees []utils.Employee
+	// if err := .ShouldBindJSON(&employees); err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// 	return
+	// }
+
+	// var payslips []utils.PayslipResponse
+	// for _, employee := range employees {
+	// 	payslip := GenerateRESTPayslip(employee)
+	// 	payslips = append(payslips, payslip)
+	// }
+
+	// payload := gin.H{"message": "Calculated tax successfully", "payslips": payslips}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Calculated tax successfully"})
 }
 
 // Generate payslip for given employee
