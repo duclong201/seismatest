@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/csv"
-	"encoding/json"
 	"fmt"
 	"main/utils"
 	"net/http"
@@ -81,45 +80,6 @@ func HandleCSVUpload(c *gin.Context) {
 	c.JSON(http.StatusOK, payload)
 }
 
-// Handle CSV file uploaded from POST request
-func HandleCSV(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseMultipartForm(32 << 20)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	file, _, err := r.FormFile("csv_file")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	defer file.Close()
-
-	// Process the CSV data
-	csvData, err := csv.NewReader(file).ReadAll()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Return a response to confirm that the CSV file has been successfully processed
-	response := make(map[string]interface{})
-	response["message"] = "CSV file successfully processed"
-	response["data"] = csvData
-
-	jsonResponse, err := json.Marshal(response)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(jsonResponse)
-
-}
-
 // Handle request to calculate tax
 func HandleRequest(c *gin.Context) {
 	var employees []utils.Employee
@@ -129,6 +89,7 @@ func HandleRequest(c *gin.Context) {
 	}
 	var payslips []utils.PayslipResponse
 	for _, employee := range employees {
+		fmt.Println(employee)
 		payslip := GenerateRESTPayslip(employee)
 		payslips = append(payslips, payslip)
 	}
