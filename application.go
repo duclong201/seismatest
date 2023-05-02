@@ -16,6 +16,7 @@ import (
 )
 
 func main() {
+	fmt.Println("New Version")
 	r := gin.Default()
 	gin.SetMode(gin.ReleaseMode)
 	r.GET("/test", func(c *gin.Context) {
