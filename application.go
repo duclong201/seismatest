@@ -67,6 +67,7 @@ func HandleCSVUpload(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+		fmt.Println(employee)
 		payslip := GenerateCSVPayslip(employee)
 		payslips = append(payslips, payslip)
 	}
@@ -89,7 +90,6 @@ func HandleRequest(c *gin.Context) {
 	}
 	var payslips []utils.PayslipResponse
 	for _, employee := range employees {
-		fmt.Println(employee)
 		payslip := GenerateRESTPayslip(employee)
 		payslips = append(payslips, payslip)
 	}
