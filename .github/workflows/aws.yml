@@ -23,6 +23,7 @@ jobs:
 
       - name: Build VueJS web
         run: |
+          cd seismatest-web
           npm install
           npm run build
 
