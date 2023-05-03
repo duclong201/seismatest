@@ -23,13 +23,14 @@ jobs:
 
       - name: Build VueJS web
         run: |
+          ls -l
           cd seismatest-web
           npm install
           npm run build
 
       - name: Copy file from dist to public
         run: |
-          cp -R dist/ public/
+          cp -R seismatest-web/dist/ public/
       
       - name: Build Go Application
         run: go build -v ./...
