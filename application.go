@@ -18,7 +18,6 @@ import (
 )
 
 func main() {
-	fmt.Println("New Version")
 	r := gin.Default()
 	gin.SetMode(gin.ReleaseMode)
 	r.GET("/test", func(c *gin.Context) {
@@ -31,6 +30,7 @@ func main() {
 	r.Run(":5000")
 }
 
+// HandleUpload method handle file upload to the API
 func HandleUpload(c *gin.Context) {
 	formFile, err := c.FormFile("file")
 	if err != nil {
@@ -123,7 +123,7 @@ func HandleJSONFile(file multipart.File) ([]utils.PayslipResponse, error) {
 // Handle request to calculate tax
 func HandleRequest(c *gin.Context) {
 	var employees []utils.Employee
-	if err := c.ShouldBindJSON(&employees); err != nil {
+	if err := c.ShouldBind(&employees); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
